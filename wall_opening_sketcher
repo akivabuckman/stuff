@@ -1,0 +1,460 @@
+from tkinter import *
+from tkinter import messagebox
+import tkinter as tk
+import turtle as trt
+from turtle import setworldcoordinates, TurtleScreen, RawTurtle
+
+
+def starting_params():
+    global ceiling_height
+    global section_width
+    ceiling_height = ceiling_height_entry.get()
+    section_width = section_width_entry.get()
+    start_window.destroy()
+
+
+def initialize():
+    global ceiling_height_entry
+    global section_width_entry
+    global start_window
+    start_window = Tk()
+    start_window.title("Wall Opening Builder")
+    start_window.config(padx=5, pady=5)
+    welcome = tk.Label(text="Hey there, let's create a wall")
+    welcome.grid(row=0, column=0, columnspan=3)
+
+    # Labels
+    section_width_label = tk.Label(text="What's the section's width?")
+    section_width_label.grid(row=1, column=0)
+    section_width_label_cm = tk.Label(text="[cm]")
+    section_width_label_cm.grid(row=1, column=2)
+    ceiling_height_label = tk.Label(text="What's the ceiling height?")
+    ceiling_height_label.grid(row=2, column=0)
+    ceiling_height_label_cm = tk.Label(text="[cm]")
+    ceiling_height_label_cm.grid(row=2, column=2)
+
+    # Entries
+    section_width_entry = tk.Entry(start_window)
+    section_width_entry.grid(row=1, column=1)
+    section_width_entry.focus()
+    ceiling_height_entry = tk.Entry(start_window)
+    ceiling_height_entry.grid(row=2, column=1)
+
+    # Buttons
+    submit_button = Button(start_window, text="Let's draw!", command=starting_params)
+    submit_button.grid(row=3, column=0, columnspan=3)
+    start_window.mainloop()
+
+
+def draw_ceiling_and_floor(ceiling_height):
+    draw.goto(0, ceiling_height)
+    draw.pendown()
+    draw.seth(0)
+    draw.forward(section_width)
+    draw.penup()
+    draw.goto(0, 0)
+    draw.pendown()
+    draw.forward(section_width)
+    draw.penup()
+    draw.goto(0, 0)
+
+
+def back():
+    shape_window.destroy()
+
+
+def get_rectangle_info():
+    global window_exists
+    global shape_window
+
+    if window_exists:
+        shape_window.destroy()
+
+    shape_window = Toplevel()
+    window_exists = True
+    shape_window.title("New Rectangle Opening")
+    shape_window.config(padx=5, pady=5)
+
+    rec_label = tk.Label(shape_window, text="Enter the opening's info:")
+    rec_label.grid(row=0, column=0, columnspan=3)
+
+    rec_width_label = tk.Label(master=shape_window, text="Width [cm]: ")
+    rec_height_label = tk.Label(master=shape_window, text="Height [cm]:")
+    rec_elevation_label = tk.Label(master=shape_window, text="Elevation [cm]: ")
+    rec_fromlast_label = tk.Label(master=shape_window, text="Distance from last [cm]: ")
+    rec_width_label.grid(row=1, column=0)
+    rec_height_label.grid(row=2, column=0)
+    rec_elevation_label.grid(row=3, column=0)
+    rec_fromlast_label.grid(row=4, column=0)
+
+    rec_width_entry = tk.Entry(master=shape_window)
+    rec_width_entry.grid(row=1, column=1)
+    rec_height_entry = tk.Entry(master=shape_window)
+    rec_height_entry.grid(row=2, column=1)
+    rec_elevation_entry = tk.Entry(master=shape_window)
+    rec_elevation_entry.grid(row=3, column=1)
+    rec_fromlast_entry = tk.Entry(master=shape_window)
+    rec_fromlast_entry.grid(row=4, column=1)
+    rec_width_entry.focus()
+
+    rec_ok_button = tk.Button(master=shape_window, text="OK", command=lambda: draw_rectangle(rec_width_entry.get(),
+                                                                                             rec_height_entry.get(),
+                                                                                             rec_elevation_entry.get(),
+                                                                                             rec_fromlast_entry.get()))
+    rec_ok_button.grid(row=5, column=0)
+
+    rec_cancel_button = tk.Button(master=shape_window, text="Cancel", command=back)
+    rec_cancel_button.grid(row=5, column=1)
+
+
+def get_circle_info():
+    global window_exists
+    global shape_window
+
+    if window_exists:
+        shape_window.destroy()
+
+    shape_window = Toplevel()
+    window_exists = True
+    shape_window.title("New Circle Opening")
+    shape_window.config(padx=5, pady=5)
+
+    rec_label = tk.Label(shape_window, text="Enter the opening's info:")
+    rec_label.grid(row=0, column=0, columnspan=3)
+
+    cir_diameter_label = tk.Label(master=shape_window, text="Diameter [cm]: ")
+    cir_elevation_label = tk.Label(master=shape_window, text="Center's Elevation [cm]: ")
+    cir_fromlast_label = tk.Label(master=shape_window, text="Distance from last [cm]: ")
+    cir_diameter_label.grid(row=1, column=0)
+    cir_elevation_label.grid(row=2, column=0)
+    cir_fromlast_label.grid(row=3, column=0)
+
+    cir_diameter_entry = tk.Entry(master=shape_window)
+    cir_diameter_entry.grid(row=1, column=1)
+    cir_elevation_entry = tk.Entry(master=shape_window)
+    cir_elevation_entry.grid(row=2, column=1)
+    cir_fromlast_entry = tk.Entry(master=shape_window)
+    cir_fromlast_entry.grid(row=3, column=1)
+    cir_diameter_entry.focus()
+
+    cir_ok_button = tk.Button(master=shape_window, text="OK", command=lambda: draw_circle(cir_diameter_entry.get(),
+                                                                                         cir_elevation_entry.get(),
+                                                                                         cir_fromlast_entry.get()))
+    cir_ok_button.grid(row=4, column=0)
+
+    cir_cancel_button = tk.Button(master=shape_window, text="Cancel", command=back)
+    cir_cancel_button.grid(row=4, column=1)
+
+
+def get_wall_info():
+    global window_exists
+    global shape_window
+
+    if window_exists:
+        shape_window.destroy()
+
+    shape_window = Toplevel()
+    window_exists = True
+    shape_window.title("New Wall")
+    shape_window.config(padx=5, pady=5)
+
+    wall_label = tk.Label(shape_window, text="Enter the wall's info:")
+    wall_label.grid(row=0, column=0, columnspan=3)
+
+    wall_width_label = tk.Label(master=shape_window, text="Width [cm]: ")
+    wall_fromlast_label = tk.Label(master=shape_window, text="Distance from last [cm]: ")
+    wall_width_label.grid(row=1, column=0)
+    wall_fromlast_label.grid(row=2, column=0)
+
+    wall_width_entry = tk.Entry(master=shape_window)
+    wall_width_entry.grid(row=1, column=1)
+    wall_fromlast_entry = tk.Entry(master=shape_window)
+    wall_fromlast_entry.grid(row=2, column=1)
+    wall_width_entry.focus()
+
+    wall_ok_button = tk.Button(master=shape_window, text="OK", command=lambda: draw_wall(wall_width_entry.get(),
+                                                                                        wall_fromlast_entry.get()))
+    wall_ok_button.grid(row=3, column=0)
+
+    wall_cancel_button = tk.Button(master=shape_window, text="Cancel", command=back)
+    wall_cancel_button.grid(row=3, column=1)
+
+
+def draw_rectangle(width, height, elevation, fromlast):
+    global ELEMENTS
+    global measure_height
+    global TICK
+    back()
+    ELEMENTS.append({})
+    entries = [width, height, elevation, fromlast]
+    errors = ""
+    for i in entries:
+        try:
+            i = int(i)
+        except ValueError:
+            errors += f"{i}, "
+    if len(errors) > 0:
+        messagebox.showwarning("Uh oh", f"You entered '{errors}'and all parameters must be numbers.")
+        get_rectangle_info()
+        return
+    #check for ceiling or floor clash
+    if int(elevation) + int(height) > ceiling_height:
+        messagebox.showwarning("Watch out!","That's going to hit the ceiling!")
+        get_rectangle_info()
+        return
+    if int(elevation) < 0:
+        messagebox.showwarning("Watch out!", "That's going to hit the floor!")
+        get_rectangle_info()
+        return
+#draw fromlast ticks and measurements
+    draw.penup()
+    draw.seth(90)
+    draw.forward(measure_height)
+    draw.seth(45)
+    draw.pendown()
+    draw.forward(TICK)
+    draw.back(TICK * 2)
+    draw.forward(TICK)
+    draw.seth(0)
+    draw.forward(int(fromlast))
+    draw.seth(45)
+    draw.forward(TICK)
+    draw.back(TICK * 2)
+    draw.forward(TICK)
+    draw.seth(0)
+    draw.penup()
+    draw.back(int(fromlast) / 2)
+    draw.seth(90)
+    draw.forward(5)
+    draw.write(fromlast, font=("Arial", 20, "normal"), align="Center")
+    draw.back(5)
+    draw.seth(0)
+    draw.forward(int(fromlast) / 2)
+    draw.setheading(90)
+    draw.penup()
+    draw.back(measure_height)
+
+    #draw rectangle
+    draw.forward(int(elevation))
+    draw.pendown()
+    for i in range(2):
+        draw.forward(int(height))
+        draw.right(90)
+        draw.forward(int(width))
+        draw.right(90)
+    draw.penup()
+    draw.goto(draw.xcor(), int(elevation) + int(height) / 2)
+    draw.pendown()
+    draw.seth(45)
+    draw.forward(TICK)
+    draw.back(TICK * 2)
+    draw.forward(TICK)
+    draw.seth(0)
+    draw.forward(int(width))
+    draw.seth(45)
+    draw.forward(TICK)
+    draw.back(TICK * 2)
+    draw.forward(TICK)
+    draw.penup()
+    draw.seth(0)
+    draw.back(int(width) / 2)
+    draw.seth(90)
+    draw.forward(5)
+    draw.write(width, font=("Arial", 20, "normal"), align="Center")
+    draw.seth(0)
+    draw.back(int(width) / 2)
+    draw.seth(90)
+    draw.goto(draw.xcor(),0)
+    draw.seth(0)
+
+def draw_circle(diameter, elevation, fromlast):
+    back()
+    entries = [diameter, elevation, fromlast]
+    errors = ""
+    for i in entries:
+        try:
+            i = int(i)
+        except ValueError:
+            errors += f"{i} "
+    if len(errors) > 0:
+        messagebox.showwarning("Uh oh", f"You entered '{errors}', and all parameters must be numbers.")
+        get_circle_info()
+        return
+    if int(elevation) + int(diameter)/2 > ceiling_height:
+        messagebox.showwarning("Watch out!","That's going to hit the ceiling!")
+        get_circle_info()
+        return
+    if int(elevation) - int(diameter) / 2 < 0:
+        messagebox.showwarning("Watch out!","That's going to hit the floor!")
+        get_circle_info()
+        return
+
+    #draw fromlast and dimension
+    draw.seth(90)
+    draw.forward(measure_height)
+    draw.seth(45)
+    draw.pendown()
+    draw.forward(TICK)
+    draw.back(TICK * 2)
+    draw.forward(TICK)
+    draw.seth(0)
+    draw.forward(int(fromlast))
+    draw.seth(45)
+    draw.forward(TICK)
+    draw.back(TICK * 2)
+    draw.forward(TICK)
+    draw.seth(0)
+    draw.penup()
+    draw.back((int(fromlast)/2))
+    draw.seth(90)
+    draw.forward(5)
+    draw.write(fromlast, font=("Arial", 20, "normal"), align="Center")
+    draw.back(5)
+    draw.seth(0)
+
+    #draw circle
+    draw.forward(int(fromlast)/2)
+    draw.goto(draw.xcor(), int(elevation) - int(diameter)/2)
+    draw.pendown()
+    draw.circle(int(diameter)/2)
+
+    #draw circle dimension
+    draw.penup()
+    draw.back(int(diameter)/2)
+    draw.goto(draw.xcor(), int(elevation))
+    draw.seth(45)
+    draw.pendown()
+    draw.forward(TICK)
+    draw.back(TICK * 2)
+    draw.forward(TICK)
+    draw.seth(0)
+    draw.forward(int(diameter))
+    draw.pendown()
+    draw.seth(45)
+    draw.pendown()
+    draw.forward(TICK)
+    draw.back(TICK * 2)
+    draw.forward(TICK)
+    draw.seth(0)
+    draw.penup()
+    draw.back(int(diameter)/2)
+    draw.seth(90)
+    draw.forward(5)
+    draw.write(diameter, font=("Arial", 20, "normal"), align="Center")
+    draw.goto(draw.xcor(), 0)
+    draw.seth(0)
+
+def draw_wall(width, fromlast):
+    back()
+    entries = [width, fromlast]
+    errors = ""
+    for i in entries:
+        try:
+            i = int(i)
+        except ValueError:
+            errors += f"{i} and"
+    if len(errors) > 0:
+        messagebox.showwarning("Uh oh", f"You entered '{errors}', all parameters must be numbers.")
+        get_wall_info()
+        return
+    else:
+        # draw fromlast ticks and measurements
+        draw.penup()
+        draw.seth(90)
+        draw.forward(measure_height)
+        draw.seth(45)
+        draw.pendown()
+        draw.forward(TICK)
+        draw.back(TICK * 2)
+        draw.forward(TICK)
+        draw.seth(0)
+        draw.forward(int(fromlast))
+        draw.seth(45)
+        draw.forward(TICK)
+        draw.back(TICK * 2)
+        draw.forward(TICK)
+        draw.seth(0)
+        draw.penup()
+        draw.back(int(fromlast) / 2)
+        draw.seth(90)
+        draw.forward(5)
+        draw.write(fromlast, font=("Arial", 20, "normal"), align="Center")
+        draw.back(5)
+        draw.seth(0)
+        draw.forward(int(fromlast) / 2)
+        draw.penup()
+        draw.goto(draw.xcor(),0)
+
+        #draw wall
+        draw.seth(0)
+        draw.setheading(90)
+        draw.pendown()
+        draw.forward(int(ceiling_height))
+        draw.seth(0)
+        draw.forward(int(width))
+        draw.seth(270)
+        draw.forward(int(ceiling_height))
+        draw.seth(0)
+        draw.back(int(width))
+        draw.penup()
+
+# SET PARAMETERS #
+initialize()
+need_ceiling_height = True
+need_section_width = True
+while not (not need_ceiling_height or not need_section_width):
+    try:
+        section_width = int(section_width)
+    except ValueError:
+        try:
+            ceiling_height = int(ceiling_height)
+        except ValueError:
+            messagebox.showwarning("Uh oh!",
+                                   f"You entered '{section_width}' and '{ceiling_height}' as the section width and ceiling" \
+                                   f" height, and those aren't numbers.")
+            initialize()
+        else:
+            messagebox.showwarning("Uh oh!",
+                                   f"You entered '{section_width}' as the section width, and that's not a number.")
+            initialize()
+    else:
+        need_section_width = False
+        try:
+            ceiling_height = int(ceiling_height)
+        except ValueError:
+            need_section_width = True
+            messagebox.showwarning("Uh oh!",
+                                   f"You entered '{ceiling_height}' as the ceiling height, and that's not a number.")
+            initialize()
+        else:
+            need_ceiling_height = False
+            measure_height = ceiling_height / 2
+
+# Drawing Space #
+window = tk.Tk()
+canvas = tk.Canvas(master=window, width=section_width + 50, height=ceiling_height + 50)
+canvas.grid(row=0, column=1, rowspan=10, columnspan=10)
+screen = TurtleScreen(canvas)
+screen.setworldcoordinates(-50, -50, section_width + 50, ceiling_height + 50)
+draw = RawTurtle(screen)
+draw.penup()
+draw.speed("fastest")
+TICK = 10
+ELEMENTS = []
+
+# Labels
+add_label = tk.Label(text="Choose next element:")
+add_label.grid(row=0, column=0)
+# Buttons
+rectangle_button = tk.Button(master=window, text="Rectangle", command=get_rectangle_info, width=20, height=int(ceiling_height/80))
+rectangle_button.grid(row=1, column=0)
+circle_button = tk.Button(master=window, text="Circle", command=get_circle_info, width=20, height=int(ceiling_height/80))
+circle_button.grid(row=2, column=0)
+wall_button = tk.Button(master=window, text="Wall", command=get_wall_info, width=20, height=int(ceiling_height/80))
+wall_button.grid(row=3, column=0)
+
+# Draw Ceiling and floor #
+draw_ceiling_and_floor(ceiling_height)
+
+window_exists = False
+window.mainloop()
